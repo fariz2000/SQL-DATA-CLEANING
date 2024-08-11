@@ -5,7 +5,7 @@
 SELECT *
 FROM layoffs;
 
--- create a duplicate table which can be edited so that original data is kept untouched.
+-- 2.create a duplicate table which can be edited so that original data is kept untouched.
 
 CREATE TABLE layoff_1
 LIKE layoffs;
@@ -13,7 +13,7 @@ LIKE layoffs;
 SELECT *
 FROM layoff_1;
 
--- copy the values from layoffs to layoff_1
+-- 3.copy the values from layoffs to layoff_1
 
 INSERT INTO layoff_1
 SELECT *
@@ -22,14 +22,14 @@ FROM layoffs;
 SELECT *
 FROM layoff_1;
 
--- now find for duplicate values and delete them
+-- 4.now find for duplicate values and delete them
 
 SELECT *,
 ROW_NUMBER() OVER(
 PARTITION BY company,location,industry,total_laid_off,percentage_laid_off,'date',stage,country,funds_raised_millions) AS row_id
 FROM layoff_1;
 
--- now create a cte so that a condition can be applied
+-- 5.now create a cte so that a condition can be applied
 
 WITH duplicate_cte AS
 (
@@ -46,8 +46,8 @@ DELETE
 FROM duplicate_cte
 WHERE row_id>1;
 
--- so a cte is not updatable , therefore we have top copy this into another table and then delete from that table
--- so now copy create table into clipboard(from schemas bar) and paste it here. and create a new column as row_id with INT
+-- 6.so a cte is not updatable , therefore we have top copy this into another table and then delete from that table
+-- 7.so now copy create table into clipboard(from schemas bar) and paste it here. and create a new column as row_id with INT
 
 CREATE TABLE `layoff_2` (
   `company` text,
@@ -82,7 +82,7 @@ SELECT *
 FROM layoff_2
 WHERE row_id=2;
 
--- now the duplicate values have been deleted , now have to standarize the whole table like trim and clear null or blank values.
+-- 8.now the duplicate values have been deleted , now have to standarize the whole table like trim and clear null or blank values.
 
 SELECT *
 FROM layoff_2;
@@ -96,31 +96,31 @@ SET company=TRIM(company);
 SELECT *
 FROM layoff_2;
 
---  chech all locations
+-- 9.check all locations
 
 SELECT DISTINCT(location)
 FROM layoff_2
 ORDER BY 1;
 
--- CHECK ALL INDUSTRIES
+-- 10.CHECK ALL INDUSTRIES
 
 SELECT DISTINCT(industry)
 FROM layoff_2
 ORDER BY 1;
 
--- there is null and a blank value in industry . fill the null or blank values if possible
+-- 11.there is null and a blank value in industry . fill the null or blank values if possible
 
 SELECT *
 FROM layoff_2
 WHERE industry is NULL OR industry='';
 
--- just check if there is another row of airbnb where there is industry
+-- 12.just check if there is another row of airbnb where there is industry
 
 SELECT *
 FROM layoff_2
 WHERE company='Airbnb';
 
--- so these null values can be updated . but before that convert these blank values to null values.
+-- 13.so these null values can be updated . but before that convert these blank values to null values.
 
 UPDATE layoff_2
 SET industry=NULL
@@ -130,7 +130,7 @@ SELECT *
 FROM layoff_2
 WHERE industry is NULL;
 
--- NOW USING JOIN WE WILL FILL THE NULL VALUES
+-- 14.NOW USING JOIN WE WILL FILL THE NULL VALUES
 
 SELECT *
 FROM layoff_2 t1
@@ -139,7 +139,7 @@ JOIN layoff_2 t2
 WHERE t1.industry IS NULL
 AND t2.industry IS NOT NULL;
 
--- UPDATE THE VALUES
+-- 15.UPDATE THE VALUES
 
 UPDATE layoff_2 t1
 JOIN layoff_2 t2
@@ -152,7 +152,7 @@ SELECT *
 FROM layoff_2
 WHERE company='Airbnb';
 
--- now change date to proper date
+-- 16.now change date to proper date
 
 SELECT `date`,
 STR_TO_DATE(`date`,'%m/%d/%Y')
@@ -170,7 +170,7 @@ MODIFY COLUMN `date` DATE;
 SELECT *
 FROM layoff_2;
 
--- DROP ROW_ID
+-- 17.DROP ROW_ID
 
 ALTER TABLE layoff_2
 DROP column row_id;
@@ -178,4 +178,4 @@ DROP column row_id;
 SELECT *
 FROM layoff_2;
 
--- this is the required table
+-- 18.this is the required table
